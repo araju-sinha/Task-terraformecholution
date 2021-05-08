@@ -1,0 +1,14 @@
+---
+- hosts: webserver
+  gather_facts: yes
+  remote_user: ubuntu
+  become: yes
+  tasks:
+   - name: nginx
+     yum:
+      name: nginx
+      state: present
+   - name: Start service nginx, if started
+     ansible.builtin.service:
+        name: nginx
+        state: started
