@@ -13,24 +13,24 @@ provider "aws" {
   secret_key = "eZblw6M7LOli2w64/BYEs7uJ5vS0PEJfNSoDvtNA"
 }
 
-resource "aws_vpc" "task-vpc" {
+resource "aws_vpc" "prod-vpc" {
   cidr_block       = "10.0.0.0/16"
   tags = {
-    Name = "TaskVPC"
+    Name = "production"
   }
 }
 
 resource "aws_subnet" "subnet-1" {
-  vpc_id     = aws_vpc.task-vpc.id
+  vpc_id     = aws_vpc.prod-vpc.id
   cidr_block = "10.0.1.0/24"
 
   tags = {
-    Name = "task-subnet"
+    Name = "prod-subnet"
   }
 }
 
-resource "aws_security_group" "task_sec" {
-  name        = "task-sec-group"
+resource "aws_security_group" "instance_sec" {
+  name        = "ubuntu-sec-group"
   description = "Allow SSH traffic and web ports"
 
   ingress {
@@ -49,12 +49,22 @@ resource "aws_security_group" "task_sec" {
     cidr_blocks      = ["0.0.0.0/0"]
 
   }
+
   ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description      = "SSH"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+
+  }
+
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -68,15 +78,19 @@ resource "tls_private_key" "privatekey" {
 }
 
 resource "aws_key_pair" "generated_key" {
-  key_name   = "ubuntutaskkey"
+  key_name   = "ubuntukey"
   public_key = tls_private_key.privatekey.public_key_openssh
 }
 
-resource "aws_instance" "task-ubuntu" {
+resource "aws_instance" "prod-ubuntu" {
   ami           = "ami-09e67e426f25ce0d7"
   instance_type = "t2.micro"
   key_name      = aws_key_pair.generated_key.key_name
-  vpc_security_group_ids = [aws_security_group.task_sec.id]
+  vpc_security_group_ids = [aws_security_group.instance_sec.id]
+
+  tags = {
+    Name = "ubuntu"
+  }
 }
 
 output "tls_private_key" {
