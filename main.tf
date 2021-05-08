@@ -9,8 +9,8 @@ version = "~> 3.0"
 
 provider "aws" {
   region     = "us-east-1"
-  access_key = "AKIARKB35ZMGTJEZGXED"
-  secret_key = "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"
+  access_key = "AK###################ED"
+  secret_key = "eZbl####################S0PEJfNSoDvtNA"
 }
 
 resource "aws_vpc" "prod-vpc" {
